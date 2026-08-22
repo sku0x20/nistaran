@@ -1,4 +1,4 @@
-resource "vultr_instance" "this" {
+resource "vultr_instance" "nistaran" {
   label       = var.label
   hostname    = var.hostname
   region      = var.region
