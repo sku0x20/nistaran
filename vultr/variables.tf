@@ -4,8 +4,7 @@ variable "vultr_api_key" {
   sensitive   = true
 }
 
-variable "ssh_key_ids" {
-  description = "Vultr SSH key IDs to install on the instance"
-  type        = list(string)
-  default     = []
+variable "ssh_public_key" {
+  description = "Public key (ed25519) to register with Vultr and install on the instance"
+  type        = string
 }

@@ -1,2 +1,2 @@
-vultr_api_key = "your-vultr-api-key"
-ssh_key_ids   = ["your-ssh-key-id"]
+vultr_api_key  = "your-vultr-api-key"
+ssh_public_key = "ssh-ed25519 AAAA... your-key-comment"
