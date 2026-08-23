@@ -23,7 +23,7 @@ net.ipv4.ip_local_port_range=1024 32767
 # Exclude any ports already bound by other prod services in this box's
 # 1024-32767 range, so the kernel/nftables never pick them for NAT. Fill in
 # the actual ports on the server directly — don't commit them here.
-# net.ipv4.ip_local_reserved_ports=
+# net.ipv4.ip_local_reserved_ports=,
 EOF
 sysctl -p /etc/sysctl.d/99-jool-nat64.conf
 
