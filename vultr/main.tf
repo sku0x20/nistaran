@@ -14,3 +14,21 @@ resource "vultr_instance" "tarani" {
   enable_ipv6 = true
   backups     = "disabled"
 }
+
+# Reserved IPs keep the instance's address stable across destroy/recreate,
+# but cost ~$3/mo each and main_ip is otherwise stable across reboots/resizes.
+# Uncomment if something external starts depending on a fixed IP.
+#
+# resource "vultr_reserved_ip" "tarani" {
+#   region      = "bom"
+#   ip_type     = "v4"
+#   label       = "tarani"
+#   instance_id = vultr_instance.tarani.id
+# }
+#
+# resource "vultr_reserved_ip" "tarani_v6" {
+#   region      = "bom"
+#   ip_type     = "v6"
+#   label       = "tarani-v6"
+#   instance_id = vultr_instance.tarani.id
+# }
