@@ -13,12 +13,13 @@ apt-get install -y "linux-headers-$(uname -r)" jool-dkms jool-tools
 
 echo jool > /etc/modules-load.d/jool.conf
 
-# Reserve the top of the port range for Jool's own NAT64 NAPT allocator, which
-# doesn't know about the kernel's local port allocator or nftables' masquerade
-# state, so it can otherwise double-book a port already in use on this IP.
+# Jool's NAT64 NAPT allocator doesn't know about the kernel's local port
+# allocator or nftables' masquerade state, so it needs its own disjoint band
+# (32768-65535, set in jool-nat64-apply.sh) — shrink the kernel's ephemeral
+# range to match so host connections and nftables' masquerade stay out of it.
 cat > /etc/sysctl.d/99-jool-nat64.conf <<'EOF'
 net.ipv6.conf.all.forwarding=1
-net.ipv4.ip_local_port_range=32768 59999
+net.ipv4.ip_local_port_range=1024 32767
 EOF
 sysctl -p /etc/sysctl.d/99-jool-nat64.conf
 
