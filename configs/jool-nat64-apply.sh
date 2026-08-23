@@ -20,10 +20,6 @@ printf -v HEX2 '%02x%02x' "$O3" "$O4"
 POOL6="${PREFIX64}::/96"
 CLIENT_V6="${PREFIX64}::${HEX1}:${HEX2}"
 
-if ! ip -6 addr show dev "$WAN_IF" | grep -q "${CLIENT_V6}/64"; then
-	ip -6 addr add "${CLIENT_V6}/64" dev "$WAN_IF"
-fi
-
 modprobe jool
 
 if ! jool instance display 2>/dev/null | grep -q "^$INSTANCE\b"; then
