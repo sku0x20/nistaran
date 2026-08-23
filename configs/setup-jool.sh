@@ -18,7 +18,7 @@ net.ipv6.conf.all.forwarding=1
 EOF
 sysctl -p /etc/sysctl.d/99-jool-nat64.conf
 
-install -m 755 "$SCRIPT_DIR/jool-nat64-apply.sh" /usr/local/sbin/jool-nat64-apply.sh
+install -m 755 "$SCRIPT_DIR/apply-jool.sh" /usr/local/sbin/apply-jool.sh
 
 cat > /etc/systemd/system/jool-nat64.service <<'EOF'
 [Unit]
@@ -29,7 +29,7 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/local/sbin/jool-nat64-apply.sh
+ExecStart=/usr/local/sbin/apply-jool.sh
 
 [Install]
 WantedBy=multi-user.target
