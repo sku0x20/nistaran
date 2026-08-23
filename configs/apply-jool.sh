@@ -32,7 +32,7 @@ table ip6 jool_shim {
 	}
 
 	chain nat_pre {
-		type nat hook prerouting priority -350; policy accept;
+		type nat hook prerouting priority -150; policy accept;
 		iifname $WAN_IF ip6 daddr $PUBLIC_V6 tcp dport 443 dnat to $CLIENT_V6:443
 		iifname $WAN_IF ip6 daddr $PUBLIC_V6 udp dport 443 dnat to $CLIENT_V6:443
 	}
