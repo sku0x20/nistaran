@@ -26,7 +26,8 @@ table ip6 jool_shim
 delete table ip6 jool_shim
 
 table ip6 jool_shim {
-	# jool hooks at NF_IP6_PRI_NAT_DST+25 = -75, so both chains below must run before that
+	# jool hooks at NF_IP6_PRI_NAT_DST+25 = -75 (src/mod/common/xlator.c,
+	# NICMx/Jool), so both chains below must run before that
 	chain guard {
 		type filter hook prerouting priority -400; policy accept;
 		iifname $WAN_IF ip6 daddr $POOL6 drop
