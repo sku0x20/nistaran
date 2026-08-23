@@ -15,7 +15,36 @@ printf -v HEX1 '%02x%02x' "$O1" "$O2"
 printf -v HEX2 '%02x%02x' "$O3" "$O4"
 
 POOL6="${PREFIX64}::/96"
-CLIENT_V6="${PREFIX64}::${HEX1}:${HEX2}"
+CLIENT_V6="${PREFIX64}::${HEX1}:${HEX2}"  # Jool-facing only, embeds DEST_IP - never hand out
+VANITY_V6="${PREFIX64}::1"                # hand this to clients instead, embeds nothing
+
+# Runs before jool loads: only VANITY_V6 survives, gets dnat'd to the real
+# pool6 address Jool expects. Keeps DEST_IP from being derivable off the
+# address we publish, and keeps the rest of pool6 unreachable from outside.
+cat > /etc/nftables-jool.conf <<EOF
+#!/usr/sbin/nft -f
+
+table ip6 jool_shim
+delete table ip6 jool_shim
+
+table ip6 jool_shim {
+	chain guard {
+		type filter hook prerouting priority -400; policy accept;
+		iifname $WAN_IF ip6 daddr $POOL6 ip6 daddr != $VANITY_V6 drop
+	}
+
+	chain dnat {
+		type nat hook prerouting priority -350; policy accept;
+		iifname $WAN_IF ip6 daddr $VANITY_V6 dnat to $CLIENT_V6
+	}
+
+	chain snat {
+		type nat hook postrouting priority srcnat; policy accept;
+		oifname $WAN_IF ip6 saddr $CLIENT_V6 snat to $VANITY_V6
+	}
+}
+EOF
+nft -f /etc/nftables-jool.conf
 
 modprobe jool
 
@@ -27,13 +56,4 @@ jool -i "$INSTANCE" pool4 flush
 jool -i "$INSTANCE" pool4 add "$SOURCE_V4" --tcp --port-range "$JOOL_PORT_RANGE"
 jool -i "$INSTANCE" pool4 add "$SOURCE_V4" --udp --port-range "$JOOL_PORT_RANGE"
 
-# eamt isn't in this jool build's CLI (NAT64-only, no SIIT merge), so pool6
-# embedding is generic across the whole /96 - close that with a filter
-# instead: drop anything in POOL6 except CLIENT_V6, before Jool's own hook.
-nft add table ip6 jool_guard
-nft -- add chain ip6 jool_guard prerouting { type filter hook prerouting priority -300 \; }
-nft flush chain ip6 jool_guard prerouting
-nft add rule ip6 jool_guard prerouting ip6 daddr "$CLIENT_V6" accept
-nft add rule ip6 jool_guard prerouting ip6 daddr "$POOL6" drop
-
-echo "hand this address to clients: $CLIENT_V6"
+echo "hand this address to clients: $VANITY_V6"
