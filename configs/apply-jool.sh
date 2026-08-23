@@ -5,7 +5,7 @@ WAN_IF=enp1s0
 DEST_IP=104.16.124.96
 JOOL_PORT_RANGE=32768-65535
 INSTANCE=nat64
-# mandatory but unreachable: not part of our routed /64
+# Required by the kernel module even when using EAM, this is RFC 6052 well-known prefix, unreachable.
 POOL6=64:ff9b::/96
 
 SOURCE_V4="$(ip -4 -o addr show "$WAN_IF" | awk '{print $4}' | cut -d/ -f1 | head -1)"
