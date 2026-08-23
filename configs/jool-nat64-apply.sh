@@ -15,9 +15,7 @@ if ! jool instance display 2>/dev/null | grep -q "^$INSTANCE\b"; then
 	jool instance add "$INSTANCE" --netfilter
 fi
 
-# EAM instead of pool6 embedding: only PUBLIC_V6 ever translates, to DEST_IP
-# only. No pool6 means anything else is untranslatable — no open relay to
-# arbitrary destinations, unlike a generic NAT64 gateway.
+# EAM, not pool6: fixed 1:1 mapping, no open relay to arbitrary destinations.
 jool -i "$INSTANCE" eamt flush
 jool -i "$INSTANCE" eamt add "${PUBLIC_V6}/128" "${DEST_IP}/32"
 
