@@ -9,7 +9,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 apt-get update
-apt-get install -y nftables
+apt-get install -y nftables conntrack
 
 install -m 644 "$SCRIPT_DIR/nftables.conf" /etc/nftables.conf
 
