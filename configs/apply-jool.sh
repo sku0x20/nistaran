@@ -16,12 +16,9 @@ printf -v HEX1 '%02x%02x' "$O1" "$O2"
 printf -v HEX2 '%02x%02x' "$O3" "$O4"
 
 POOL6="${PREFIX64}::/96"
-CLIENT_V6="${PREFIX64}::${HEX1}:${HEX2}"  # Jool-facing only, embeds DEST_IP - never hand out
+CLIENT_V6="${PREFIX64}::${HEX1}:${HEX2}"  # embeds DEST_IP - never hand out, Jool-facing only
 
-# Runs before jool loads: dnat/snat the box's own (SLAAC) address to/from
-# the pool6 address Jool expects - stateless 1:1, no tracking needed. Keeps
-# DEST_IP from being derivable off the address clients actually use, and
-# blocks direct access to the rest of pool6.
+# runs before jool loads, so pool6 is never reachable unshielded
 cat > /etc/nftables-jool.conf <<EOF
 #!/usr/sbin/nft -f
 
