@@ -13,12 +13,8 @@ apt-get install -y "linux-headers-$(uname -r)" jool-dkms jool-tools
 
 echo jool > /etc/modules-load.d/jool.conf
 
-# Leaves 32768-65535 for Jool's own NAPT allocator (jool-nat64-apply.sh).
 cat > /etc/sysctl.d/99-jool-nat64.conf <<'EOF'
 net.ipv6.conf.all.forwarding=1
-net.ipv4.ip_local_port_range=1024 32767
-# fill in on the server, don't commit real prod ports
-# net.ipv4.ip_local_reserved_ports=,
 EOF
 sysctl -p /etc/sysctl.d/99-jool-nat64.conf
 

@@ -13,7 +13,12 @@ apt-get install -y nftables conntrack
 
 install -m 644 "$SCRIPT_DIR/nftables.conf" /etc/nftables.conf
 
-echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/99-nat.conf
+cat > /etc/sysctl.d/99-nat.conf <<'EOF'
+net.ipv4.ip_forward=1
+net.ipv4.ip_local_port_range=1024 32767
+# fill in on the server, don't commit real prod ports
+# net.ipv4.ip_local_reserved_ports=,
+EOF
 sysctl -p /etc/sysctl.d/99-nat.conf
 
 nft -f /etc/nftables.conf
