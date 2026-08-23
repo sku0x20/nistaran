@@ -10,6 +10,8 @@ Three independent consumers share this box's v4 identity. Each gets a disjoint b
 
 To exclude specific prod ports from the `1024-32767` band without committing them: `net.ipv4.ip_local_reserved_ports=` in `/etc/sysctl.d/99-nat.conf` (fill in on the server, not in git).
 
+**Run order matters:** `setup-nft.sh` must run before `setup-jool.sh` (which starts `jool-nat64.service` immediately). Until `ip_local_port_range` is narrowed to `1024-32767`, the host's own ephemeral ports overlap `pool4` and local v4 connections break the moment Jool is active — see below.
+
 ## Why host outbound and masquerade can share a range
 
 Port uniqueness in Linux is per **4-tuple** (local addr, local port, remote addr, remote port), not per local port alone — the same reason one ephemeral port already serves many simultaneous connections to different destinations. Masquerade's port allocator checks conntrack for exact-tuple collisions the same way the kernel's own ephemeral-port picker does. They coexist safely as long as nothing statically `bind()`s inside the shared range — which is exactly why listening services are kept out of it (`1-1023` only).
