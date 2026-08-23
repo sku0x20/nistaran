@@ -33,15 +33,17 @@ table ip6 jool_shim {
 		iifname $WAN_IF ip6 daddr $POOL6 drop
 	}
 
-	chain nat_pre {
-		type nat hook prerouting priority -150; policy accept;  # nat chains must be > -200
-		iifname $WAN_IF ip6 daddr $PUBLIC_V6 tcp dport 443 dnat to [$CLIENT_V6]:443
-		iifname $WAN_IF ip6 daddr $PUBLIC_V6 udp dport 443 dnat to [$CLIENT_V6]:443
+	# plain field rewrites, not nat: nat is conntrack-based, and jool's
+	# dst_output()-injected replies bypass conntrack, so snat never fired on them
+	chain fwd_rewrite {
+		type filter hook prerouting priority -150; policy accept;
+		iifname $WAN_IF ip6 daddr $PUBLIC_V6 tcp dport 443 ip6 daddr set $CLIENT_V6
+		iifname $WAN_IF ip6 daddr $PUBLIC_V6 udp dport 443 ip6 daddr set $CLIENT_V6
 	}
 
-	chain nat_post {
-		type nat hook postrouting priority srcnat; policy accept;
-		oifname $WAN_IF ip6 saddr $CLIENT_V6 snat to $PUBLIC_V6
+	chain rev_rewrite {
+		type filter hook postrouting priority srcnat; policy accept;
+		oifname $WAN_IF ip6 saddr $CLIENT_V6 ip6 saddr set $PUBLIC_V6
 	}
 }
 EOF
