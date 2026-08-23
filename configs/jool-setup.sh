@@ -13,16 +13,11 @@ apt-get install -y "linux-headers-$(uname -r)" jool-dkms jool-tools
 
 echo jool > /etc/modules-load.d/jool.conf
 
-# Jool's NAT64 NAPT allocator doesn't know about the kernel's local port
-# allocator or nftables' masquerade state, so it needs its own disjoint band
-# (32768-65535, set in jool-nat64-apply.sh) — shrink the kernel's ephemeral
-# range to match so host connections and nftables' masquerade stay out of it.
+# Leaves 32768-65535 for Jool's own NAPT allocator (jool-nat64-apply.sh).
 cat > /etc/sysctl.d/99-jool-nat64.conf <<'EOF'
 net.ipv6.conf.all.forwarding=1
 net.ipv4.ip_local_port_range=1024 32767
-# Exclude any ports already bound by other prod services in this box's
-# 1024-32767 range, so the kernel/nftables never pick them for NAT. Fill in
-# the actual ports on the server directly — don't commit them here.
+# fill in on the server, don't commit real prod ports
 # net.ipv4.ip_local_reserved_ports=,
 EOF
 sysctl -p /etc/sysctl.d/99-jool-nat64.conf
