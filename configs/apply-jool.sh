@@ -5,6 +5,10 @@ WAN_IF=enp1s0
 DEST_IP=104.16.124.96
 JOOL_PORT_RANGE=32768-65535
 INSTANCE=nat64
+# Required by the kernel module even though we only use EAM below - this is
+# the RFC 6052 well-known prefix, not part of our routed /64, so it's never
+# actually reachable and can't be used as an open-relay embedding target.
+POOL6=64:ff9b::/96
 
 SOURCE_V4="$(ip -4 -o addr show "$WAN_IF" | awk '{print $4}' | cut -d/ -f1 | head -1)"
 PUBLIC_V6="$(ip -6 -o addr show "$WAN_IF" scope global | awk '{print $4}' | cut -d/ -f1 | head -1)"
@@ -12,10 +16,10 @@ PUBLIC_V6="$(ip -6 -o addr show "$WAN_IF" scope global | awk '{print $4}' | cut 
 modprobe jool
 
 if ! jool instance display 2>/dev/null | grep -q "^$INSTANCE\b"; then
-	jool instance add "$INSTANCE" --netfilter
+	jool instance add "$INSTANCE" --netfilter --pool6 "$POOL6"
 fi
 
-# EAM, not pool6: fixed 1:1 mapping, no open relay to arbitrary destinations.
+# EAM: fixed 1:1 mapping, takes priority over pool6 embedding for this address.
 jool -i "$INSTANCE" eamt flush
 jool -i "$INSTANCE" eamt add "${PUBLIC_V6}/128" "${DEST_IP}/32"
 
