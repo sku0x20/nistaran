@@ -54,7 +54,7 @@ if ! jool instance display 2>/dev/null | grep -q "^$INSTANCE\b"; then
 fi
 
 jool -i "$INSTANCE" pool4 flush
-jool -i "$INSTANCE" pool4 add "$SOURCE_V4" --tcp --port-range "$JOOL_PORT_RANGE"
-jool -i "$INSTANCE" pool4 add "$SOURCE_V4" --udp --port-range "$JOOL_PORT_RANGE"
+jool -i "$INSTANCE" pool4 add --tcp "$SOURCE_V4" "$JOOL_PORT_RANGE"
+jool -i "$INSTANCE" pool4 add --udp "$SOURCE_V4" "$JOOL_PORT_RANGE"
 
 echo "hand this address to clients: $PUBLIC_V6"
